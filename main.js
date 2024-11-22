@@ -1,6 +1,7 @@
 // This is the completed source code, please only use this as a referrence.
 //Setting up a scene
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("#canvas"),
@@ -82,20 +83,17 @@ const light = new THREE.DirectionalLight(0xffffff, 2);
 light.position.set(sunx, suny, sunz);
 scene.add(light);
 
-
 //Part 2 lighting
 renderer.shadowMap.enabled = true;
 light.castShadow = true;
 earthSphere.castShadow = true;
 moon.receiveShadow = true;
-light.shadow.mapSize.width = 1000; 
+light.shadow.mapSize.width = 1000;
 light.shadow.mapSize.height = 1000;
-light.shadow.camera.left = -100; 
+light.shadow.camera.left = -100;
 light.shadow.camera.right = 100;
 light.shadow.camera.top = 100;
 light.shadow.camera.bottom = -100;
-
-
 
 //Part 3 lighting
 for (let x = -10; x <= 10; x += 10) {
@@ -107,8 +105,6 @@ for (let x = -10; x <= 10; x += 10) {
     }
   }
 }
-
-
 
 // Adding planet Mars
 const marsGeometry = new THREE.SphereGeometry(15, 100, 100);
@@ -131,17 +127,38 @@ function moveCamera() {
   // Get the current scroll position from the top of the page
   const t = document.body.getBoundingClientRect().top;
   // update camera position
-  camera.position.x = t * 0.07;
+  camera.position.x = t * 0.05;
 }
 // Call the function on scroll
 document.body.onscroll = moveCamera;
 moveCamera();
+let model = null;
+const loader = new GLTFLoader();
+loader.load(
+  "among_us/scene.gltf",
+  (gltf) => {
+    model = gltf.scene;
+    scene.add(model);
+
+    model.position.set(-90, 10, 0); // x, y, z position
+    model.scale.set(10, 10, 10); // Scale x, y, z (uniform scaling)
+  },
+  undefined,
+  (error) => {
+    console.error("An error occurred while loading the model:", error);
+  }
+);
 
 //Animation function
 function animate() {
   earthSphere.rotation.y += 0.005;
   renderer.render(scene, camera);
 
+  // Rotate the model if it's loaded
+  if (model) {
+    model.rotation.y += 0.01; // Rotate around Y-axis
+    model.rotation.x += 0.005; // Rotate around X-axis (optional)
+  }
   moon.rotation.y += moonspeed;
 
   angle += moonspeed;
